@@ -34,22 +34,34 @@
       color: white;
     }
     .content { padding: 25px; }
+    
+    .input-group {
+      margin-bottom: 18px;
+    }
+    .input-group label {
+      display: block;
+      margin-bottom: 6px;
+      font-weight: 600;
+      color: #cbd5e1;
+    }
     input, select, button {
       padding: 12px;
-      margin: 8px 0;
       border-radius: 8px;
       border: none;
       background: #334155;
       color: white;
       width: 100%;
       max-width: 320px;
+      font-size: 1rem;
     }
     button {
       background: var(--accent);
       cursor: pointer;
       font-weight: bold;
+      max-width: none;
     }
     button:hover { background: #60a5fa; }
+
     .presets {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
@@ -73,7 +85,10 @@
       font-size: 2.2rem;
       font-weight: bold;
       color: #60a5fa;
-      margin: 20px 0;
+      margin: 25px 0;
+      padding: 15px;
+      background: #1e2937;
+      border-radius: 10px;
     }
     table {
       width: 100%;
@@ -89,7 +104,7 @@
     th { background: #1e40af; }
     .print-btn {
       background: #10b981;
-      margin-bottom: 15px;
+      margin: 15px 0;
     }
     @media print {
       body { background: white; color: black; }
@@ -106,25 +121,51 @@
     </header>
 
     <div class="content">
-      <h2>Load Preset</h2>
+      <h2>Quick Presets</h2>
       <div class="presets" id="presets"></div>
 
       <h2>Manual Input</h2>
-      <input type="number" id="W" placeholder="Bullet Weight (gr)" value="124">
-      <input type="number" id="V" placeholder="Velocity (fps)" value="1180">
-      <input type="number" id="D_exp" placeholder="Expanded Diameter (in)" value="0.58" step="0.01">
-      <input type="number" id="P" placeholder="Penetration (in)" value="14" step="0.1">
-      <input type="number" id="R" placeholder="Reliability (0.7-1.1)" value="1.05" step="0.05">
+      
+      <div class="input-group">
+        <label>Bullet Weight (grains)</label>
+        <input type="number" id="W" value="124" step="1">
+      </div>
 
-      <select id="PM">
-        <option value="2.5">Brain / Upper Spine (2.5)</option>
-        <option value="1.8" selected>Heart / Major Vessels (1.8)</option>
-        <option value="1.3">Lungs / Vital Torso (1.3)</option>
-        <option value="0.8">Non-vital Torso (0.8)</option>
-        <option value="0.3">Extremity (0.3)</option>
-      </select>
+      <div class="input-group">
+        <label>Velocity (fps)</label>
+        <input type="number" id="V" value="1180" step="1">
+      </div>
 
-      <input type="number" id="shots" placeholder="Number of Shots" value="2" min="1" max="6">
+      <div class="input-group">
+        <label>Expanded Diameter (inches)</label>
+        <input type="number" id="D_exp" value="0.58" step="0.01">
+      </div>
+
+      <div class="input-group">
+        <label>Penetration Depth (inches in gel)</label>
+        <input type="number" id="P" value="14" step="0.1">
+      </div>
+
+      <div class="input-group">
+        <label>Reliability Factor (0.7 – 1.1)</label>
+        <input type="number" id="R" value="1.05" step="0.05">
+      </div>
+
+      <div class="input-group">
+        <label>Shot Placement</label>
+        <select id="PM">
+          <option value="2.5">Brain / Upper Spine (2.5)</option>
+          <option value="1.8" selected>Heart / Major Vessels (1.8)</option>
+          <option value="1.3">Lungs / Vital Torso (1.3)</option>
+          <option value="0.8">Non-vital Torso (0.8)</option>
+          <option value="0.3">Extremity (0.3)</option>
+        </select>
+      </div>
+
+      <div class="input-group">
+        <label>Number of Shots</label>
+        <input type="number" id="shots" value="2" min="1" max="6">
+      </div>
 
       <button onclick="calculateMRSE()">Calculate MRSE</button>
 
@@ -132,19 +173,21 @@
 
       <button class="print-btn no-print" onclick="window.print()">🖨️ Print Comparison Table</button>
 
-      <h2>Comparison Table</h2>
+      <h2>Comparison Table (Torso Hit • 2 Shots)</h2>
       <table id="comparisonTable">
         <thead>
           <tr>
-            <th>Load</th><th>MRSE</th><th>Rating</th>
+            <th>Load</th>
+            <th>MRSE</th>
+            <th>Rating</th>
           </tr>
         </thead>
         <tbody id="tableBody"></tbody>
       </table>
 
-      <p style="margin-top:25px; font-size:0.9rem;">
-        Data from Lucky Gunner Labs, manufacturer gel tests, and real-world ballistic studies.<br>
-        <strong>Remember:</strong> Shot placement is still the #1 factor.
+      <p style="margin-top:25px; font-size:0.9rem; opacity:0.8;">
+        💡 Use real gel test data from <strong>Lucky Gunner Labs</strong> for best accuracy.<br>
+        Shot placement remains the most important factor in real life.
       </p>
     </div>
   </div>
@@ -163,10 +206,10 @@
       {name: ".44 Magnum 240gr JHP", W:240, V:1350, D_exp:0.85, P:18, R:1.0}
     ];
 
-    // Populate presets
     function loadPresets() {
       const container = document.getElementById('presets');
-      presets.forEach((preset, i) => {
+      container.innerHTML = '';
+      presets.forEach((preset) => {
         const btn = document.createElement('div');
         btn.className = 'preset-btn';
         btn.textContent = preset.name;
@@ -185,13 +228,13 @@
     }
 
     function calculateMRSE() {
-      const W = parseFloat(document.getElementById('W').value);
-      const V = parseFloat(document.getElementById('V').value);
-      const D_exp = parseFloat(document.getElementById('D_exp').value);
-      const P = parseFloat(document.getElementById('P').value);
-      const R = parseFloat(document.getElementById('R').value);
+      const W = parseFloat(document.getElementById('W').value) || 0;
+      const V = parseFloat(document.getElementById('V').value) || 0;
+      const D_exp = parseFloat(document.getElementById('D_exp').value) || 0;
+      const P = parseFloat(document.getElementById('P').value) || 0;
+      const R = parseFloat(document.getElementById('R').value) || 1;
       const PM = parseFloat(document.getElementById('PM').value);
-      const shots = parseFloat(document.getElementById('shots').value);
+      const shots = parseFloat(document.getElementById('shots').value) || 1;
 
       const A_exp = Math.PI * Math.pow(D_exp / 2, 2);
       const E_f = V / 1000;
@@ -210,8 +253,8 @@
       let rating = mrse < 30 ? 'Marginal' : mrse < 50 ? 'Solid' : mrse < 70 ? 'Excellent' : 'Outstanding';
 
       document.getElementById('result').innerHTML = `
-        MRSE: ${rounded}<br>
-        <span style="font-size:1.1rem;">${rating}</span>
+        <strong>MRSE Score: ${rounded}</strong><br>
+        <span style="font-size:1.1rem;">Rating: ${rating}</span>
       `;
 
       updateComparisonTable();
@@ -222,13 +265,11 @@
       tbody.innerHTML = '';
 
       presets.forEach(p => {
-        // Simplified torso + 2 shots calculation
         const A = Math.PI * Math.pow(p.D_exp / 2, 2);
         const Ef = p.V / 1000;
         let mt = (p.W * p.V * A * Ef) / 7000;
         let Pf = (p.P >=12 && p.P <=18) ? 1 : (p.P <12 ? p.P/12 : 18/p.P);
-        const mf = 1.6; // 2 shots
-        const score = (mt * Pf * p.R * 1.3 * mf).toFixed(1); // torso PM=1.3
+        const score = (mt * Pf * p.R * 1.3 * 1.6).toFixed(1); // torso + 2 shots
 
         const row = document.createElement('tr');
         row.innerHTML = `<td>${p.name}</td><td><strong>${score}</strong></td><td>${score<30?'Marginal':score<50?'Solid':score<70?'Excellent':'Outstanding'}</td>`;
@@ -236,7 +277,6 @@
       });
     }
 
-    // Initialize
     window.onload = () => {
       loadPresets();
       updateComparisonTable();
