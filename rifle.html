@@ -1,1 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MRSE v2 - Rifle Calculator</title>
+  <style> /* Same style block as pistol.html */ </style>
+</head>
+<body>
+  <div class="container">
+    <header><h1>MRSE v2 — Rifle Calculator</h1></header>
+    <div class="content">
+      <div class="nav">
+        <a href="index.html">← Home</a> | 
+        <a href="pistol.html">Pistol Calculator</a> | 
+        <a href="bigbore.html">Big Bore Calculator</a>
+      </div>
 
+      <h2>Rifle Presets (High Velocity)</h2>
+      <div class="presets" id="presets"></div>
+
+      <!-- Same manual input fields as pistol.html -->
+
+      <h2>Data Sources for Rifle</h2>
+      <ul>
+        <li><a href="https://www.luckygunner.com/labs" target="_blank">Lucky Gunner Labs</a></li>
+        <li><a href="https://www.blackhills.com/" target="_blank">Black Hills Ammunition</a></li>
+        <li><a href="https://www.hornady.com/" target="_blank">Hornady</a></li>
+        <li><a href="https://www.federalpremium.com/" target="_blank">Federal</a></li>
+      </ul>
+    </div>
+  </div>
+
+  <script>
+    const presets = [
+      {name: "5.56 M855 62gr", W:62, V:3100, D_exp:0.22, P:18, R:0.95},   // Note: FMJ, limited expansion
+      {name: "5.56 77gr TMK", W:77, V:2750, D_exp:0.45, P:14, R:1.05},
+      {name: ".308 168gr OTM", W:168, V:2650, D_exp:0.31, P:22, R:0.9},
+      {name: "6.5 Creedmoor 140gr ELD", W:140, V:2700, D_exp:0.55, P:20, R:1.0},
+      {name: ".300 BLK 208gr Subsonic", W:208, V:1050, D_exp:0.65, P:16, R:1.05}
+    ];
+    // Use the same calculateMRSE function
+  </script>
+</body>
+</html>
