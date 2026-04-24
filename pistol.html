@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MRSE v2 — Modern Stopping Power Calculator</title>
+  <style>
+    :root {
+      --bg: #0f172a;
+      --card: #1e2937;
+      --text: #e2e8f0;
+      --accent: #3b82f6;
+    }
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      margin: 0;
+      padding: 15px;
+      line-height: 1.5;
+    }
+    .container {
+      max-width: 1000px;
+      margin: auto;
+      background: var(--card);
+      border-radius: 12px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+      overflow: hidden;
+    }
+    header {
+      background: linear-gradient(135deg, #1e40af, #3b82f6);
+      padding: 25px;
+      text-align: center;
+      color: white;
+    }
+    .content { padding: 25px; }
+    
+    .input-group {
+      margin-bottom: 18px;
+    }
+    .input-group label {
+      display: block;
+      margin-bottom: 6px;
+      font-weight: 600;
+      color: #cbd5e1;
+    }
+    input, select, button {
+      padding: 12px;
+      border-radius: 8px;
+      border: none;
+      background: #334155;
+      color: white;
+      width: 100%;
+      max-width: 320px;
+      font-size: 1rem;
+    }
+    button {
+      background: var(--accent);
+      cursor: pointer;
+      font-weight: bold;
+      max-width: none;
+    }
+    button:hover { background: #60a5fa; }
+
+    .presets {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 10px;
+      margin: 15px 0;
+    }
+    .preset-btn {
+      padding: 12px;
+      background: #334155;
+      border: 1px solid #475569;
+      border-radius: 8px;
+      text-align: center;
+      cursor: pointer;
+      font-size: 0.95rem;
+    }
+    .preset-btn:hover, .preset-btn.active {
+      background: #3b82f6;
+      border-color: #60a5fa;
+    }
+    .result {
+      font-size: 2.2rem;
+      font-weight: bold;
+      color: #60a5fa;
+      margin: 20px 0;
+      padding: 15px;
+      background: #1e2937;
+      border-radius: 10px;
+    }
+    .explanation {
+      background: #1e2937;
+      padding: 18px;
+      border-radius: 10px;
+      margin: 20px 0;
+      font-size: 1.02rem;
+      line-height: 1.6;
+      border-left: 5px solid #60a5fa;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 25px;
+      background: #1e2937;
+    }
+    th, td {
+      padding: 12px;
+      text-align: left;
+      border-bottom: 1px solid #334155;
+    }
+    th { background: #1e40af; }
+    .print-btn {
+      background: #10b981;
+      margin: 15px 0;
+    }
+    @media print {
+      body { background: white; color: black; }
+      .container { box-shadow: none; }
+      .no-print { display: none; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>MRSE v2</h1>
+      <p>Modern Relative Stopping Effectiveness Calculator</p>
+    </header>
+
+    <div class="content">
+      <h2>Quick Presets</h2>
+      <div class="presets" id="presets"></div>
+
+      <h2>Manual Input</h2>
+      
+      <div class="input-group">
+        <label>Bullet Weight (grains)</label>
+        <input type="number" id="W" value="124" step="1">
+      </div>
+
+      <div class="input-group">
+        <label>Velocity (fps)</label>
+        <input type="number" id="V" value="1180" step="1">
+      </div>
+
+      <div class="input-group">
+        <label>Expanded Diameter (inches)</label>
+        <input type="number" id="D_exp" value="0.58" step="0.01">
+      </div>
+
+      <div class="input-group">
+        <label>Penetration Depth (inches in gel)</label>
+        <input type="number" id="P" value="14" step="0.1">
+      </div>
+
+      <div class="input-group">
+        <label>Reliability Factor (0.7 – 1.1)</label>
+        <input type="number" id="R" value="1.05" step="0.05">
+      </div>
+
+      <div class="input-group">
+        <label>Shot Placement</label>
+        <select id="PM">
+          <option value="2.5">Brain / Upper Spine (2.5)</option>
+          <option value="1.8" selected>Heart / Major Vessels (1.8)</option>
+          <option value="1.3">Lungs / Vital Torso (1.3)</option>
+          <option value="0.8">Non-vital Torso (0.8)</option>
+          <option value="0.3">Extremity (0.3)</option>
+        </select>
+      </div>
+
+      <div class="input-group">
+        <label>Number of Shots</label>
+        <input type="number" id="shots" value="2" min="1" max="6">
+      </div>
+
+      <button onclick="calculateMRSE()">Calculate MRSE</button>
+
+      <div class="result" id="result">—</div>
+      <div class="explanation" id="explanation"></div>
+
+      <button class="print-btn no-print" onclick="window.print()">🖨️ Print Comparison Table</button>
+
+      <h2>Comparison Table (Torso Hit • 2 Shots)</h2>
+      <table id="comparisonTable">
+        <thead>
+          <tr>
+            <th>Load</th>
+            <th>MRSE</th>
+            <th>Rating</th>
+          </tr>
+        </thead>
+        <tbody id="tableBody"></tbody>
+      </table>
+
+      <p style="margin-top:25px; font-size:0.9rem; opacity:0.8;">
+        💡 Use real gel test data from <strong>Lucky Gunner Labs</strong>.<br>
+        <strong>Important:</strong> No formula replaces proper training and shot placement.
+      </p>
+    </div>
+  </div>
+
+  <script>
+    const presets = [
+      {name: "9mm 124gr Gold Dot", W:124, V:1180, D_exp:0.58, P:14, R:1.05},
+      {name: "9mm 147gr HST", W:147, V:1050, D_exp:0.62, P:15.5, R:1.08},
+      {name: "9mm 135gr +P Critical Duty", W:135, V:1250, D_exp:0.60, P:13, R:1.0},
+      {name: ".380 95gr HST", W:95, V:960, D_exp:0.52, P:11, R:0.85},
+      {name: ".40 S&W 180gr HST", W:180, V:980, D_exp:0.68, P:14, R:1.05},
+      {name: ".45 ACP 230gr HST", W:230, V:890, D_exp:0.72, P:15, R:1.05},
+      {name: "10mm 200gr Underwood", W:200, V:1250, D_exp:0.75, P:16, R:1.1},
+      {name: ".357 Magnum 158gr JHP", W:158, V:1250, D_exp:0.68, P:14, R:1.0},
+      {name: "5.7x28mm 40gr", W:40, V:1750, D_exp:0.45, P:12, R:0.9},
+      {name: ".44 Magnum 240gr JHP", W:240, V:1350, D_exp:0.85, P:18, R:1.0}
+    ];
+
+    function loadPresets() {
+      const container = document.getElementById('presets');
+      container.innerHTML = '';
+      presets.forEach((preset) => {
+        const btn = document.createElement('div');
+        btn.className = 'preset-btn';
+        btn.textContent = preset.name;
+        btn.onclick = () => {
+          document.getElementById('W').value = preset.W;
+          document.getElementById('V').value = preset.V;
+          document.getElementById('D_exp').value = preset.D_exp;
+          document.getElementById('P').value = preset.P;
+          document.getElementById('R').value = preset.R;
+          calculateMRSE();
+          document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+        };
+        container.appendChild(btn);
+      });
+    }
+
+    function getExplanation(mrse) {
+      if (mrse < 30) {
+        return `<strong>Marginal Performance</strong><br>
+                This load has limited stopping potential. You will likely need multiple well-placed hits and good shot placement to stop a threat quickly.`;
+      } else if (mrse < 50) {
+        return `<strong>Solid Performance</strong><br>
+                Good modern defensive load (typical of quality 9mm JHP). With proper placement and 2–3 shots, it offers reliable incapacitation potential.`;
+      } else if (mrse < 70) {
+        return `<strong>Excellent Performance</strong><br>
+                Very effective stopping power. Loads in this range (like strong .40 or .45 JHP) perform very well with good hits.`;
+      } else {
+        return `<strong>Outstanding Performance</strong><br>
+                Extremely high stopping potential. Big-bore expanding loads in this range can deliver rapid incapacitation when shot placement is good.`;
+      }
+    }
+
+    function calculateMRSE() {
+      const W = parseFloat(document.getElementById('W').value) || 0;
+      const V = parseFloat(document.getElementById('V').value) || 0;
+      const D_exp = parseFloat(document.getElementById('D_exp').value) || 0;
+      const P = parseFloat(document.getElementById('P').value) || 0;
+      const R = parseFloat(document.getElementById('R').value) || 1;
+      const PM = parseFloat(document.getElementById('PM').value);
+      const shots = parseFloat(document.getElementById('shots').value) || 1;
+
+      const A_exp = Math.PI * Math.pow(D_exp / 2, 2);
+      const E_f = V / 1000;
+
+      let momentum_term = (W * V * A_exp * E_f) / 7000;
+
+      let P_f = 1.0;
+      if (P < 12) P_f = P / 12;
+      else if (P > 18) P_f = 18 / P;
+
+      const M_f = Math.min(1.0 + 0.3 * (shots - 1), 2.3);
+
+      const mrse = momentum_term * P_f * R * PM * M_f;
+      const rounded = mrse.toFixed(1);
+
+      let rating = mrse < 30 ? 'Marginal' : mrse < 50 ? 'Solid' : mrse < 70 ? 'Excellent' : 'Outstanding';
+
+      // Update Result
+      document.getElementById('result').innerHTML = `
+        <strong>MRSE Score: ${rounded}</strong><br>
+        <span style="font-size:1.1rem;">Rating: ${rating}</span>
+      `;
+
+      // Update Explanation
+      document.getElementById('explanation').innerHTML = getExplanation(mrse);
+
+      updateComparisonTable();
+    }
+
+    function updateComparisonTable() {
+      const tbody = document.getElementById('tableBody');
+      tbody.innerHTML = '';
+
+      presets.forEach(p => {
+        const A = Math.PI * Math.pow(p.D_exp / 2, 2);
+        const Ef = p.V / 1000;
+        let mt = (p.W * p.V * A * Ef) / 7000;
+        let Pf = (p.P >=12 && p.P <=18) ? 1 : (p.P <12 ? p.P/12 : 18/p.P);
+        const score = (mt * Pf * p.R * 1.3 * 1.6).toFixed(1);
+
+        const row = document.createElement('tr');
+        row.innerHTML = `<td>${p.name}</td><td><strong>${score}</strong></td><td>${score<30?'Marginal':score<50?'Solid':score<70?'Excellent':'Outstanding'}</td>`;
+        tbody.appendChild(row);
+      });
+    }
+
+    window.onload = () => {
+      loadPresets();
+      updateComparisonTable();
+    };
+  </script>
+</body>
+</html>
