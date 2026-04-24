@@ -1,1 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MRSE v2 - Big Bore Calculator</title>
+  <style> /* Same style */ </style>
+</head>
+<body>
+  <div class="container">
+    <header><h1>MRSE v2 — Big Bore Calculator</h1></header>
+    <div class="content">
+      <div class="nav">
+        <a href="index.html">← Home</a> | 
+        <a href="pistol.html">Pistol Calculator</a> | 
+        <a href="rifle.html">Rifle Calculator</a>
+      </div>
 
+      <h2>Big Bore Presets</h2>
+      <div class="presets" id="presets"></div>
+
+      <!-- Same manual inputs -->
+
+      <h2>Data Sources for Big Bore</h2>
+      <ul>
+        <li><a href="https://www.luckygunner.com/labs" target="_blank">Lucky Gunner Labs</a></li>
+        <li><a href="https://www.underwoodammo.com/" target="_blank">Underwood Ammo</a></li>
+        <li><a href="https://www.buffalobore.com/" target="_blank">Buffalo Bore</a></li>
+        <li><a href="https://www.doubletapammo.com/" target="_blank">DoubleTap</a></li>
+      </ul>
+    </div>
+  </div>
+
+  <script>
+    const presets = [
+      {name: ".44 Magnum 240gr JHP", W:240, V:1350, D_exp:0.85, P:18, R:1.0},
+      {name: ".45-70 325gr Hard Cast", W:325, V:2050, D_exp:0.45, P:36, R:0.95},
+      {name: "10mm 200gr Underwood", W:200, V:1250, D_exp:0.75, P:16, R:1.1},
+      {name: ".500 S&W 400gr", W:400, V:1450, D_exp:0.90, P:20, R:1.0},
+      {name: "12ga 1oz Slug", W:437, V:1600, D_exp:0.73, P:24, R:0.9}
+    ];
+  </script>
+</body>
+</html>
